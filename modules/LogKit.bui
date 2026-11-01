@@ -1,0 +1,109 @@
+''' Severities follow Buoy System.LogLevels in increasing importance.
+Public Enum LogSeverity As Integer
+    Debug = 0
+    Info = 1
+    Warning = 2
+    Error = 3
+    Critical = 4
+End Enum
+
+Private Sub ValidateSeverity(level As LogSeverity)
+    Dim value As Integer = CType(level, Integer)
+    If value < 0 Or value > 4 Then Throw New InvalidArgumentException("Invalid log severity")
+End Sub
+
+Private Function EscapeLogField(text As String) As String
+    Dim pieces() As String
+    For Each ch As String In String.Chars(text)
+        Dim code As Integer = String.Asc(ch)
+        Select Case code
+        Case 92
+            Array.Append(pieces, "\\\\")
+        Case 9
+            Array.Append(pieces, "\\t")
+        Case 10
+            Array.Append(pieces, "\\n")
+        Case 13
+            Array.Append(pieces, "\\r")
+        Case 0 To 31, 127
+            Array.Append(pieces, "\\u{" + String.From(code) + "}")
+        Case Else
+            Array.Append(pieces, ch)
+        End Select
+    Next
+    Return String.Join(pieces, "")
+End Function
+
+''' Return exactly one LF-terminated tab-separated record, escaping field controls.
+Public Function FormatLogRecord(timestamp As String, level As LogSeverity, subsystem As String, message As String) As String
+    ValidateSeverity(level)
+    Dim names As Array Of String = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+    Return EscapeLogField(timestamp) + "\t" + names(CType(level, Integer)) + "\t" + EscapeLogField(subsystem) + "\t" + EscapeLogField(message) + "\n"
+End Function
+
+''' Synchronous single-writer bounded file logger with one .1 backup.
+Public Class FileLogger
+    Private Property mPath As String
+    Private Property mMaxBytes As Integer
+    Private Property mMinimum As LogSeverity
+
+    Public Sub Constructor(filePath As String, maxBytes As Integer = 1048576, minimumLevel As LogSeverity = LogSeverity.Info)
+        If String.Len(filePath) = 0 Then Throw New InvalidArgumentException("A nonempty log path is required")
+        If maxBytes < 64 Or maxBytes > 1073741824 Then Throw New InvalidArgumentException("maxBytes must be in 64..1073741824")
+        ValidateSeverity(minimumLevel)
+        mPath = filePath
+        mMaxBytes = maxBytes
+        mMinimum = minimumLevel
+    End Sub
+
+    Public Property FilePath As String
+        Get
+            Return mPath
+        End Get
+    End Property
+
+    Public Property MaxBytes As Integer
+        Get
+            Return mMaxBytes
+        End Get
+    End Property
+
+    Public Property MinimumLevel As LogSeverity
+        Get
+            Return mMinimum
+        End Get
+        Set
+            ValidateSeverity(value)
+            mMinimum = value
+        End Set
+    End Property
+
+    ''' Ok(True) written, Ok(False) filtered, Err(message) filesystem/size failure.
+    Public Function Write(timestamp As String, level As LogSeverity, subsystem As String, message As String) As Result Of Boolean, String
+        ValidateSeverity(level)
+        If CType(level, Integer) < CType(mMinimum, Integer) Then Return Ok(False)
+        Dim record As String = FormatLogRecord(timestamp, level, subsystem, message)
+        Dim encoded As Bytes = Bytes.FromString(record, Text.Encodings.UTF8)
+        If encoded.Count > mMaxBytes Then Return Err("Log record exceeds maxBytes")
+        Dim target As New FileSystemItem(mPath)
+        Dim currentSize As Integer = 0
+        If target.Exists() Then
+            If Not target.IsFile() Then Return Err("Log destination is not a regular file")
+            currentSize = target.Length()
+            If currentSize < 0 Then Return Err("Cannot inspect log size")
+        End If
+        Dim written As Result Of Integer, String
+        If currentSize > mMaxBytes - encoded.Count Then
+            If currentSize > mMaxBytes Then Return Err("Existing log exceeds maxBytes; explicit recovery required")
+            Dim backup As New FileSystemItem(mPath + ".1")
+            If backup.Exists() And Not backup.IsFile() Then Return Err("Log backup is not a regular file")
+            If Not target.CopyTo(backup) Then Return Err("Cannot create log backup")
+            written = target.WriteAllText(record)
+        Else
+            written = target.AppendAllText(record)
+        End If
+        If written.IsErr Then Return Err(written.Error)
+        If written.Value <> encoded.Count Then Return Err("Incomplete log record write")
+        Return Ok(True)
+    End Function
+End Class
