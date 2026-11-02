@@ -1,4 +1,4 @@
-# Severity-filtered logs, bounded file rotation
+# Rotating file logs
 
 A source-only file-logging package inspired by [Mike Cotrone's LoggingClass](https://github.com/mikecotrone/LoggingClass).
 `Import logkit` provides escaped records, severity filtering and one bounded backup

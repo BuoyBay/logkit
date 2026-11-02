@@ -1,1 +1,1 @@
-{"schema":1,"name":"logkit","version":"0.1.0","description":"Severity-filtered logs, bounded file rotation"}
+{"schema":1,"name":"logkit","version":"0.1.0","description":"Rotating file logs"}
