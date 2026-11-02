@@ -54,20 +54,10 @@ separately when messages can be large or untrusted.
 
 This intentionally does not implement remote syslog, facilities/priorities from
 RFC 5424, asynchronous logging, structured JSON fields, date-based retention or a
-viewer. The source is platform independent; runtime tests here execute on Linux.
+viewer. The source is platform independent.
 
-## Build and verify
+## Package scope
 
-```sh
-/usr/bin/buoy pkg seal . -o packages/logkit-0.1.0.buipkg
-```
-
-The runner checks all three sources on six desktop targets, seals a fresh package,
-and executes the tests and console example in an isolated temporary source tree.
-The test covers record escaping, Unicode, filtering, exact append/rotation,
-reopening, UTF-8 byte bounds, oversized existing files and filesystem failures.
-See the example (not included in this repository) and
-[upstream mapping](../PROVENANCE.md). No network calls or system logging configuration
-changes are made.
-
-Test suites and fixtures are maintainer-local and are not part of this public repository.
+LogKit requires no network service and changes no system logging configuration.
+The [source mapping](../PROVENANCE.md) records its independent implementation and
+upstream API inspiration.

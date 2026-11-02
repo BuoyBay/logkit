@@ -1,8 +1,8 @@
 # Write severity-filtered logs with bounded file rotation
 
-A pure Buoy file-logging package inspired by [Mike Cotrone's LoggingClass](https://github.com/mikecotrone/LoggingClass).
+A source-only file-logging package inspired by [Mike Cotrone's LoggingClass](https://github.com/mikecotrone/LoggingClass).
 `Import logkit` provides escaped records, severity filtering and one bounded backup
-file. Buoy's built-in `System.Log` already sends diagnostics to the OS and stderr;
+file. The built-in `System.Log` already sends diagnostics to the OS and stderr;
 use it directly when you do not need an application-owned log file.
 
 ## Install
@@ -18,7 +18,7 @@ consumer project for reproducible installs.
 
 ## Example
 
-```buoy
+```basic
 Import logkit
 
 Sub Main(args As Array Of String)
@@ -56,7 +56,6 @@ On your own machine, install Buoy and run:
 buoy ai init --both
 ```
 
-The generated agent files and editor settings stay local and are ignored by Git.
 
 ## Contributing
 

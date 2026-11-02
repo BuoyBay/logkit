@@ -11,7 +11,7 @@ related: ["index.md", "api.md", "typed-api.md"]
 
 Copy logkit into packages and import it. This example accepts an explicit application-owned destination path. With no path it formats a record only. Supplying a path writes one record and can append/rotate an existing log, so select a dedicated destination with an existing parent folder.
 
-```buoy
+```basic
 Import logkit
 
 Sub Main(args As Array Of String)

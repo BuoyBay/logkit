@@ -33,5 +33,4 @@ Embedded NUL is outside the Buoy 0.72 String contract tested for this package. D
 - [Getting started](getting-started.md)
 - [API reference](api.md)
 
-
 [Full typed API: properties, parameters, defaults, and returns](typed-api.md)

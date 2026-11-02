@@ -29,8 +29,6 @@ Severities follow Buoy System.LogLevels in increasing importance.
 | `Error` | `LogSeverity` | `3` | — |
 | `Critical` | `LogSeverity` | `4` | — |
 
-## LogKit functions
-
 ### FormatLogRecord
 
 `Public Function FormatLogRecord(timestamp As String, level As LogSeverity, subsystem As String, message As String) As String`
