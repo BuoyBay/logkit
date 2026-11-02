@@ -1,1 +1,1 @@
-{"schema":1,"name":"logkit","version":"0.1.0","description":"Escaped single-line severity-filtered logs and bounded single-writer file rotation"}
+{"schema":1,"name":"logkit","version":"0.1.0","description":"Severity-filtered logs, bounded file rotation"}
